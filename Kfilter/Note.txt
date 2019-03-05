@@ -1,0 +1,2 @@
+Hello !!!	
+3/5/2019	13h00	 setSensor executable loss 340 ->380 ms		(At MILANO Sun coffee)
