@@ -8,7 +8,7 @@
 // combo time: 
 //unsigned long _tempTime = millis();
 //Serial.println(millis() - _tempTime); 
-//
+//{@Plot.MyFirstPlotWindow.Accel.Green accel[0].x}{@Plot.MyFirstPlotWindow.Velocity.Blue veloc[0].velocityX}{@Plot.MyFirstPlotWindow.Position.Red position[0].positionX}
 #include "kalman.h"
 #include "BNO055_support.h"
 #include <Wire.h>
@@ -40,6 +40,7 @@ void setup() //This code is executed once
 	//Configuration to NDoF mode
 	bno055_set_operation_mode(OPERATION_MODE_ACCONLY);
 	Serial.begin(115200);
+	//calibrate(&cali);
 	/*unsigned long _tempTime = millis();
 	calibrate(&cali);
 	Serial.println(millis() - _tempTime);*/
@@ -47,9 +48,10 @@ void setup() //This code is executed once
 
 void loop() //This code is looped forever
 {
-	accel[0] = accel[1]; // good job
-	getSensor(64,&accel[1]); // good job
+	//unsigned long _tempTime = millis();
+	run();
 	Serial.println(accel[0].x);
+	//Serial.println(millis() - _tempTime);
 }
 void calibrate(Accel* ptr) {
 	
@@ -84,4 +86,20 @@ void getSensor(unsigned char _sample,Accel* ptr) { // no check
 	}
 	ptr->x = tempX / _sample;
 	ptr->y = tempY / _sample;
+}
+void run() {
+	getSensor(1, &accel[1]); // good job
+	//Serial.println(accel[0].x);
+	veloc[1].velocityX = veloc[0].velocityX + accel[0].x + (accel[1].x - accel[0].x)>>1;
+	veloc[1].velocityY = veloc[0].velocityY + accel[0].y + (accel[1].y - accel[0].y)>>1;
+	//
+	//position[1].positionX = position[0].positionX + veloc[0].velocityX*DELTA_T + ((veloc[1].velocityX - veloc[0].velocityX)*DELTA_T) / 2;
+	//position[1].positionY = position[0].positionY + veloc[0].velocityY*DELTA_T + ((veloc[1].velocityY - veloc[0].velocityY)*DELTA_T) / 2;
+	// update value
+	position[1].positionX = position[0].positionX + veloc[0].velocityX + (veloc[1].velocityX - veloc[0].velocityX) >> 1;
+	position[1].positionY = position[0].positionY + veloc[0].velocityY + (veloc[1].velocityY - veloc[0].velocityY) >> 1;
+	accel[0] = accel[1];
+	veloc[0] = veloc[1];
+	position[0] = position[1];
+	//hihi
 }
